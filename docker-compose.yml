@@ -15,7 +15,7 @@ services:
         target: /data/users.yaml
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${MEDIA_SERVER_PATH}/dozzle/data:/data
+      - dozzle-data:/data
 
   prometheus-plex-exporter:
     container_name: prometheus-plex-exporter
@@ -43,10 +43,11 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ${MEDIA_SERVER_PATH}/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ${MEDIA_SERVER_PATH}/prometheus/config/rules:/etc/prometheus/rules:ro
-      - ${MEDIA_SERVER_PATH}/prometheus/data/:/prometheus
-
+      - prometheus-data:/prometheus
+      - prometheus-rules:/etc/prometheus/rules
+    configs:
+      - source: prometheus-config
+        target: /etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -109,9 +110,30 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ${MEDIA_SERVER_PATH}/grafana/data:/var/lib/grafana
-      - ${MEDIA_SERVER_PATH}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ${MEDIA_SERVER_PATH}/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - grafana-data:/var/lib/grafana
+    configs:
+      - source: grafana-datasource
+        target: /etc/grafana/provisioning/datasources/prometheus.yml
+      - source: grafana-dashboard-provider
+        target: /etc/grafana/provisioning/dashboards/provider.yml
+      - source: grafana-dashboard-server
+        target: /etc/grafana/provisioning/dashboards/server.json
+      - source: grafana-dashboard-gpu
+        target: /etc/grafana/provisioning/dashboards/gpu.json
+      - source: grafana-dashboard-plex-streaming
+        target: /etc/grafana/provisioning/dashboards/plex-streaming.json
+      - source: grafana-dashboard-storage
+        target: /etc/grafana/provisioning/dashboards/storage.json
+      - source: grafana-dashboard-thermals
+        target: /etc/grafana/provisioning/dashboards/thermals.json
+      - source: grafana-dashboard-container
+        target: /etc/grafana/provisioning/dashboards/container.json
+      - source: grafana-dashboard-media-server
+        target: /etc/grafana/provisioning/dashboards/media-server.json
+      - source: grafana-dashboard-media-server-legacy
+        target: /etc/grafana/provisioning/dashboards/Media Server.json
+      - source: grafana-dashboard-plex
+        target: /etc/grafana/provisioning/dashboards/plex.json
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -129,4 +151,36 @@ services:
 
 secrets:
   users:
-    file: ${MEDIA_SERVER_PATH}/dozzle/data/users.yaml
+    file: ./dozzle/data/users.yaml
+
+volumes:
+  dozzle-data:
+  prometheus-data:
+  prometheus-rules:
+  grafana-data:
+
+configs:
+  prometheus-config:
+    file: ./prometheus/config/prometheus.yml
+  grafana-datasource:
+    file: ./grafana/provisioning/datasources/prometheus.yml
+  grafana-dashboard-provider:
+    file: ./grafana/provisioning/dashboards/provider.yml
+  grafana-dashboard-server:
+    file: ./grafana/provisioning/dashboards/server.json
+  grafana-dashboard-gpu:
+    file: ./grafana/provisioning/dashboards/gpu.json
+  grafana-dashboard-plex-streaming:
+    file: ./grafana/provisioning/dashboards/plex-streaming.json
+  grafana-dashboard-storage:
+    file: ./grafana/provisioning/dashboards/storage.json
+  grafana-dashboard-thermals:
+    file: ./grafana/provisioning/dashboards/thermals.json
+  grafana-dashboard-container:
+    file: ./grafana/provisioning/dashboards/container.json
+  grafana-dashboard-media-server:
+    file: ./grafana/provisioning/dashboards/media-server.json
+  grafana-dashboard-media-server-legacy:
+    file: './grafana/provisioning/dashboards/Media Server.json'
+  grafana-dashboard-plex:
+    file: ./grafana/provisioning/dashboards/plex.json

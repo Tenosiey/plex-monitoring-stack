@@ -33,30 +33,9 @@ A comprehensive Docker Compose setup for a Plex media server with monitoring and
    # ... configure other .env files as needed
    ```
 
-3. Set the required environment variables in your shell or create a `.env` file in the root:
+3. (Optional) Update the root `.env` file if you want to define shared environment variables for the stack.
 
-   ```bash
-   export MEDIA_PATH="/path/to/your/media"
-   export MEDIA_SERVER_PATH="/path/to/this/directory"
-   ```
-
-4. Create the data directories that will be mounted:
-
-   ```bash
-   mkdir -p prometheus/data
-   mkdir -p grafana/data
-   mkdir -p plex/config
-   mkdir -p dozzle/data
-   ```
-
-5. Configure user permissions for data directories:
-
-   ```bash
-   sudo chown -R $(id -u):$(id -g) prometheus/data
-   sudo chown -R $(id -u):$(id -g) grafana/data
-   ```
-
-6. Start the services:
+4. Start the services:
 
    ```bash
    docker compose up -d
@@ -72,7 +51,7 @@ A comprehensive Docker Compose setup for a Plex media server with monitoring and
 ## Configuration Files
 
 - `prometheus/config/prometheus.yml`: Prometheus configuration
-- `prometheus/config/rules/`: Prometheus alerting rules
+- `prometheus-rules` volume (`/etc/prometheus/rules` inside the container): Prometheus alerting rules
 - `grafana/provisioning/`: Grafana datasources and dashboards
 - `dozzle/data/users.yaml`: Dozzle user authentication
 
@@ -82,12 +61,14 @@ This repository includes pre-configured Grafana dashboards for monitoring your P
 
 ## Data Persistence
 
-The following directories contain persistent data and are mounted from the host:
+Persistent data for the stack is stored in Docker named volumes. The following volumes are created automatically:
 
-- `prometheus/data/`: Time series data
-- `grafana/data/`: Dashboards, users, and settings
-- `plex/config/`: Plex configuration and metadata
-- `dozzle/data/`: Log viewer configuration
+- `prometheus-data`: Prometheus time series data
+- `prometheus-rules`: Prometheus alerting rules
+- `grafana-data`: Grafana dashboards, users, and settings
+- `dozzle-data`: Dozzle configuration and authentication data
+
+You can manage these volumes with Docker commands such as `docker volume ls` and `docker volume inspect`.
 
 ## Notes
 
