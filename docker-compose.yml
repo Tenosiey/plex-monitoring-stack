@@ -68,20 +68,6 @@ services:
     pid: host
     volumes:
       - '/:/host:ro,rslave'
-  dcgm-exporter:
-    image: nvidia/dcgm-exporter:4.3.1-4.4.1-ubuntu22.04
-    container_name: dcgm-exporter
-    pull_policy: always
-    restart: unless-stopped
-    gpus: all
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - no-new-privileges:true
-    env_file:
-      - ./dcgm-exporter/.env
-    # ports:
-    #   - "9400:9400"
   smartctl-exporter:
     image: quay.io/prometheuscommunity/smartctl-exporter:latest
     container_name: smartctl-exporter
